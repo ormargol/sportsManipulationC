@@ -24,7 +24,6 @@ typedef struct {
     team* teams[TEAMS_NUM];
     bool strength_graph[TEAMS_NUM][TEAMS_NUM];
     bool positive_manipulators[TEAMS_NUM][TEAMS_NUM];
-    bool negative_manipulators[TEAMS_NUM][TEAMS_NUM];
 }league;
 
 int algorithm_init(league* lg) {
@@ -45,7 +44,6 @@ int algorithm_init(league* lg) {
                 lg->strength_graph[t1][t2] = false;
             }
             lg->positive_manipulators[t1][t2] = false;
-            lg->negative_manipulators[t1][t2] = false;
         }
     }
     lg->positive_manipulators[3][4] = true;
@@ -54,7 +52,31 @@ int algorithm_init(league* lg) {
     return 0;
 }
 
-int algorithm_execute(league* league, team* team, bool win_manipulates) {
+int calculate_groups_scores(league* lg, team* tm) {
+    return 0;
+}
+
+bool calculate_tree(league* lg, team* tm) {
+    return false;
+}
+
+bool try_swap_two_firsts_on_tm_group(league* lg, team* tm) {
+    return false;
+}
+
+int algorithm_execute(league* lg, team* tm) {
+    calculate_groups_scores(lg, tm);
+    if (calculate_tree(lg, tm)) {
+        printf("yes!\n");
+        return 0;
+    }
+    if (try_swap_two_firsts_on_tm_group(lg, tm)) {
+        if (calculate_tree(lg, tm)) {
+            printf("yes!\n");
+            return 0;
+        }
+    }
+    printf("no!\n");
     return 0;
 }
 
