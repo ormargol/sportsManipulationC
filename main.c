@@ -100,5 +100,8 @@ int algorithm_execute(league* lg, team* tm) {
 }
 
 int main(int argc, char** argv) {
+    league lg;
+    algorithm_init(&lg);
+    algorithm_execute(&lg, lg.teams[0]);
     return 0;
 }
