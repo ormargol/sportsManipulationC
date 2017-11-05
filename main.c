@@ -102,8 +102,8 @@ bool calculate_tree(league* lg, team* tm) {
     int left_teams;
     for (left_teams = GROUPS_NUM * 2; left_teams > 1; left_teams /= 2) {
         for (t = 0; t < left_teams / 2; t++) {
-            printf("%d %c %d , ", tree_teams[2 * t]->id, lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id]? '>':'<', tree_teams[2 * t + 1]->id);
-            if (lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id]) {
+            printf("%d %c %d , ", tree_teams[2 * t]->id, (lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id] || lg->positive_manipulators[tree_teams[2 * t + 1]->id][tree_teams[2 * t]->id])? '>':'<', tree_teams[2 * t + 1]->id);
+            if (lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id] || lg->positive_manipulators[tree_teams[2 * t + 1]->id][tree_teams[2 * t]->id]) {
                 tree_teams[t] = tree_teams[2 * t];
             } else {
                 tree_teams[t] = tree_teams[2 * t + 1];
