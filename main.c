@@ -97,7 +97,21 @@ bool calculate_tree(league* lg, team* tm) {
             tree_teams[GROUPS_NUM * 2 - t - 1] = lg->groups[g]->teams[0];
         }
     }
-    return false;
+    int left_teams;
+    for (left_teams = GROUPS_NUM * 2; left_teams > 1; left_teams /= 2) {
+        for (t = 0; t < left_teams / 2; t++) {
+            if (tree_teams[2 * t]->score > tree_teams[2 * t + 1]->score) {
+                tree_teams[t] = tree_teams[2 * t];
+            } else {
+                tree_teams[t] = tree_teams[2 * t + 1];
+            }
+        }
+    }
+    if (tree_teams[0] == tm) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool try_swap_two_firsts_on_tm_group(league* lg, team* tm) {
