@@ -21,7 +21,6 @@ typedef struct {
 
 typedef struct {
     group* groups[GROUPS_NUM];
-    team* teams[TEAMS_NUM];
     bool strength_graph[TEAMS_NUM][TEAMS_NUM];
     bool positive_manipulators[TEAMS_NUM][TEAMS_NUM];
 }league;
@@ -145,6 +144,6 @@ int algorithm_execute(league* lg, team* tm) {
 int main(int argc, char** argv) {
     league lg;
     algorithm_init(&lg);
-    algorithm_execute(&lg, lg.teams[0]);
+    algorithm_execute(&lg, lg.groups[0]->teams[0]);
     return 0;
 }
