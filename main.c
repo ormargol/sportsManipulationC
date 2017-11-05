@@ -54,6 +54,7 @@ int algorithm_init(league* lg) {
 
 int calculate_groups_scores(league* lg, team* tm) {
     int g, t1, t2;
+    team* temp;
     for (g = 0; g < GROUPS_NUM; g++) {
         for (t1 = 0; t1 < GROUP_SIZE; t1++) {
             for (t2 = t1 + 1; t2 < GROUP_SIZE; t2++) {
@@ -69,6 +70,15 @@ int calculate_groups_scores(league* lg, team* tm) {
                     continue;
                 }
                 lg->groups[g]->teams[t1]->score += 3;
+            }
+        }
+        for (t1 = 0; t1 < GROUP_SIZE; t1++) {
+            for (t2 = t1 + 1; t2 < GROUP_SIZE; t2++) {
+                if (lg->groups[g]->teams[t1]->score < lg->groups[g]->teams[t2]->score) {
+                    temp = lg->groups[g]->teams[t1];
+                    lg->groups[g]->teams[t1] = lg->groups[g]->teams[t2];
+                    lg->groups[g]->teams[t2] = temp;
+                }
             }
         }
     }
