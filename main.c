@@ -51,7 +51,7 @@ int algorithm_init(league* lg) {
     return 0;
 }
 
-int calculate_groups_scores(league* lg, team* tm) {
+int calculate_groups_scores(league* lg) {
     int g, t1, t2;
     team* temp;
     for (g = 0; g < GROUPS_NUM; g++) {
@@ -59,10 +59,8 @@ int calculate_groups_scores(league* lg, team* tm) {
             for (t2 = t1 + 1; t2 < GROUP_SIZE; t2++) {
 
                 if (lg->positive_manipulators[lg->groups[g]->teams[t1]->id][lg->groups[g]->teams[t2]->id]) {
-                    if (tm->id == lg->groups[g]->teams[t2]->id) {
-                        lg->groups[g]->teams[t2]->score += 3;
-                        continue;
-                    }
+                    lg->groups[g]->teams[t2]->score += 3;
+                    continue;
                 }
                 if (lg->strength_graph[lg->groups[g]->teams[t2]->id][lg->groups[g]->teams[t1]->id]) {
                     lg->groups[g]->teams[t2]->score +=3;
@@ -121,17 +119,17 @@ bool calculate_tree(league* lg, team* tm) {
     }
 }
 
-bool try_swap_two_firsts_on_tm_group(league* lg, team* tm) {
+bool try_swap_two_firsts_on_tm_group(league* lg) {
     return false;
 }
 
 int algorithm_execute(league* lg, team* tm) {
-    calculate_groups_scores(lg, tm);
+    calculate_groups_scores(lg);
     if (calculate_tree(lg, tm)) {
         printf("yes!\n");
         return 0;
     }
-    if (try_swap_two_firsts_on_tm_group(lg, tm)) {
+    if (try_swap_two_firsts_on_tm_group(lg)) {
         if (calculate_tree(lg, tm)) {
             printf("yes!\n");
             return 0;
