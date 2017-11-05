@@ -81,6 +81,11 @@ int calculate_groups_scores(league* lg, team* tm) {
                 }
             }
         }
+        printf("GROUP %d:\n", lg->groups[g]->id);
+        for (t1 = 0; t1 < GROUP_SIZE; t1++) {
+            printf("TEAM %d: score=%d\n", lg->groups[g]->teams[t1]->id, lg->groups[g]->teams[t1]->score);
+        }
+        printf("\n");
     }
     return 0;
 }
@@ -100,14 +105,17 @@ bool calculate_tree(league* lg, team* tm) {
     int left_teams;
     for (left_teams = GROUPS_NUM * 2; left_teams > 1; left_teams /= 2) {
         for (t = 0; t < left_teams / 2; t++) {
-            if (tree_teams[2 * t]->score > tree_teams[2 * t + 1]->score) {
+            printf("%d %c %d , ", tree_teams[2 * t]->id, lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id]? '>':'<', tree_teams[2 * t + 1]->id);
+            if (lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id]) {
                 tree_teams[t] = tree_teams[2 * t];
             } else {
                 tree_teams[t] = tree_teams[2 * t + 1];
             }
         }
+        printf("\n");
     }
-    if (tree_teams[0] == tm) {
+    printf("%d\n", tree_teams[0]->id);
+    if (tree_teams[0]->id == tm->id) {
         return true;
     } else {
         return false;
