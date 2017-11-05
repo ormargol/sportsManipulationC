@@ -86,6 +86,17 @@ int calculate_groups_scores(league* lg, team* tm) {
 }
 
 bool calculate_tree(league* lg, team* tm) {
+    team* tree_teams[GROUPS_NUM * 2];
+    int g, t = 0;
+    for (g = 0; g < GROUPS_NUM; g++, t++) {
+        if (g %2 == 0) {
+            tree_teams[t] = lg->groups[g]->teams[0];
+            tree_teams[GROUPS_NUM * 2 - t - 1] = lg->groups[g]->teams[1];
+        } else {
+            tree_teams[t] = lg->groups[g]->teams[1];
+            tree_teams[GROUPS_NUM * 2 - t - 1] = lg->groups[g]->teams[0];
+        }
+    }
     return false;
 }
 
