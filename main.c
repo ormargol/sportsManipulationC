@@ -72,43 +72,79 @@ int algorithm_init(league* lg, int argc, char** argv) {
             for (i = 3; i < argc; i++) {
                 sscanf(argv[i], "%d", &j);
                 lg->positive_manipulators[j][lg->manipulated_team_id] = true;
+                LOGD("team %d will manipulate for win of team %d\n", j, lg->manipulated_team_id);
             }
         }
     }
     return 0;
 }
 
+bool game_winner_first_win(league* lg, int tm1, int tm2) {
+    if (lg->positive_manipulators[tm1][tm2] == true) {
+        LOGD("%d wins %d due to manipulation\n", tm2, tm1);
+        return false;
+    }
+    if (lg->positive_manipulators[tm2][tm1] == true) {
+        LOGD("%d wins %d due to manipulation\n", tm1, tm2);
+        return true;
+    }
+    if (lg->strength_graph[tm1][tm2] == true) {
+        LOGD("%d wins %d due to strength\n", tm1, tm2);
+        return true;
+    }
+    LOGD("%d wins %d due to strength\n", tm2, tm1);
+    return false;
+}
+
+bool first_team_best_score(league* lg, team *tm1, team *tm2) {
+    if (tm1->score > tm2->score) {
+        LOGD("%d before %d due to score\n", tm1->id, tm2->id);
+        return true;
+    }
+    if (tm2->score > tm1->score) {
+        LOGD("%d before %d due to score\n", tm2->id, tm1->id);
+        return false;
+    }
+    if (lg->positive_manipulators[tm1->id][tm2->id] == true) {
+        LOGD("%d before %d due to manipulation\n", tm2->id, tm1->id);
+        return false;
+    }
+    if (lg->positive_manipulators[tm2->id][tm1->id] == true) {
+        LOGD("%d before %d due to manipulation\n", tm1->id, tm2->id);
+        return true;
+    }
+    if (lg->strength_graph[tm1->id][tm2->id] == true) {
+        LOGD("%d before %d due to strength\n", tm1->id, tm2->id);
+        return true;
+    }
+    LOGD("%d before %d due to strength\n", tm2->id, tm1->id);
+    return false;
+}
+
 int calculate_groups_scores(league* lg) {
     int g, t1, t2;
     team* temp;
-    int manipulations = 0;
     for (g = 0; g < GROUPS_NUM; g++) {
         for (t1 = 0; t1 < GROUP_SIZE; t1++) {
             for (t2 = t1 + 1; t2 < GROUP_SIZE; t2++) {
-
-                if (lg->positive_manipulators[lg->groups[g]->teams[t1]->id][lg->groups[g]->teams[t2]->id]) {
+                if (game_winner_first_win(lg, lg->groups[g]->teams[t1]->id, lg->groups[g]->teams[t2]->id) == true) {
+                    lg->groups[g]->teams[t1]->score += 3;
+                } else {
                     lg->groups[g]->teams[t2]->score += 3;
-                    manipulations++;
-                    continue;
                 }
-                if (lg->strength_graph[lg->groups[g]->teams[t2]->id][lg->groups[g]->teams[t1]->id]) {
-                    lg->groups[g]->teams[t2]->score +=3;
-                    continue;
-                }
-                lg->groups[g]->teams[t1]->score += 3;
             }
         }
+        LOGD("\n");
         for (t1 = 0; t1 < GROUP_SIZE; t1++) {
             for (t2 = t1 + 1; t2 < GROUP_SIZE; t2++) {
-                if (lg->groups[g]->teams[t1]->score < lg->groups[g]->teams[t2]->score ||
-                        (manipulations > 0 && lg->groups[g]->teams[t1]->score == lg->groups[g]->teams[t2]->score &&
-                        (lg->groups[g]->teams[t2]->id == lg->manipulated_team_id || lg->positive_manipulators[lg->groups[g]->teams[t2]->id][lg->manipulated_team_id] == true))) {
+                if (first_team_best_score(lg, lg->groups[g]->teams[t2], lg->groups[g]->teams[t1])) {
                     temp = lg->groups[g]->teams[t1];
                     lg->groups[g]->teams[t1] = lg->groups[g]->teams[t2];
                     lg->groups[g]->teams[t2] = temp;
                 }
             }
         }
+        LOGD("\n");
         LOGD("GROUP %d:\n", lg->groups[g]->id);
         for (t1 = 0; t1 < GROUP_SIZE; t1++) {
             LOGD("TEAM %d: score=%d\n", lg->groups[g]->teams[t1]->id, lg->groups[g]->teams[t1]->score);
@@ -133,8 +169,7 @@ bool calculate_tree(league* lg) {
     int left_teams;
     for (left_teams = GROUPS_NUM * 2; left_teams > 1; left_teams /= 2) {
         for (t = 0; t < left_teams / 2; t++) {
-            LOGD("%d %c %d , ", tree_teams[2 * t]->id, (lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id] || lg->positive_manipulators[tree_teams[2 * t + 1]->id][tree_teams[2 * t]->id])? '>':'<', tree_teams[2 * t + 1]->id);
-            if (lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id] || lg->positive_manipulators[tree_teams[2 * t + 1]->id][tree_teams[2 * t]->id]) {
+            if (game_winner_first_win(lg, tree_teams[2 * t]->id, tree_teams[2 * t + 1]->id) == true) {
                 tree_teams[t] = tree_teams[2 * t];
             } else {
                 tree_teams[t] = tree_teams[2 * t + 1];
