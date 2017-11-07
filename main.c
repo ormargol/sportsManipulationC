@@ -153,16 +153,16 @@ bool try_swap_two_firsts_on_tm_group(league* lg) {
 int algorithm_execute(league* lg) {
     calculate_groups_scores(lg);
     if (calculate_tree(lg)) {
-        LOGT("yes!\n");
+        LOGT("yes\n");
         return 0;
     }
     if (try_swap_two_firsts_on_tm_group(lg)) {
         if (calculate_tree(lg)) {
-            LOGT("yes!\n");
+            LOGT("yes\n");
             return 0;
         }
     }
-    LOGT("no!\n");
+    LOGT("no\n");
     return 0;
 }
 
