@@ -1,11 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #define TEAMS_NUM 8
 #define GROUP_SIZE 4
 #define GROUPS_NUM (TEAMS_NUM / GROUP_SIZE)
 #define true 1
 #define false 0
+
+int debug_level;
+
+#define LOG_LVL_DEBUG 2
+#define LOG_LVL_TEST 1
+
+void LOG(int lvl, const char* fmt, ...) {
+    if (lvl <= debug_level) {
+        va_list args;
+        va_start(args, fmt);
+        vprintf(fmt, args);
+        va_end(args);
+    }
+}
+
+#define LOGD(fmt, ...) LOG(LOG_LVL_DEBUG, fmt, ##__VA_ARGS__)
+#define LOGT(fmt, ...) LOG(LOG_LVL_TEST, fmt, ##__VA_ARGS__)
 
 typedef int bool;
 
@@ -23,9 +41,10 @@ typedef struct {
     group* groups[GROUPS_NUM];
     bool strength_graph[TEAMS_NUM][TEAMS_NUM];
     bool positive_manipulators[TEAMS_NUM][TEAMS_NUM];
+    int manipulated_team_id;
 }league;
 
-int algorithm_init(league* lg) {
+int algorithm_init(league* lg, int argc, char** argv) {
     int g, t1, t2;
     for (g = 0; g < GROUPS_NUM; g++) {
         lg->groups[g] = malloc(sizeof(group));
@@ -45,9 +64,17 @@ int algorithm_init(league* lg) {
             lg->positive_manipulators[t1][t2] = false;
         }
     }
-    lg->positive_manipulators[3][4] = true;
-    lg->positive_manipulators[6][4] = true;
-    lg->positive_manipulators[8][4] = true;
+    if (argc > 1) {
+        sscanf(argv[1], "%d", &debug_level);
+        if (argc > 2) {
+            sscanf(argv[2], "%d", &(lg->manipulated_team_id));
+            int i, j;
+            for (i = 3; i < argc; i++) {
+                sscanf(argv[i], "%d", &j);
+                lg->positive_manipulators[j][lg->manipulated_team_id] = true;
+            }
+        }
+    }
     return 0;
 }
 
@@ -78,16 +105,16 @@ int calculate_groups_scores(league* lg) {
                 }
             }
         }
-        printf("GROUP %d:\n", lg->groups[g]->id);
+        LOGD("GROUP %d:\n", lg->groups[g]->id);
         for (t1 = 0; t1 < GROUP_SIZE; t1++) {
-            printf("TEAM %d: score=%d\n", lg->groups[g]->teams[t1]->id, lg->groups[g]->teams[t1]->score);
+            LOGD("TEAM %d: score=%d\n", lg->groups[g]->teams[t1]->id, lg->groups[g]->teams[t1]->score);
         }
-        printf("\n");
+        LOG(LOG_LVL_DEBUG, "\n");
     }
     return 0;
 }
 
-bool calculate_tree(league* lg, team* tm) {
+bool calculate_tree(league* lg) {
     team* tree_teams[GROUPS_NUM * 2];
     int g, t = 0;
     for (g = 0; g < GROUPS_NUM; g++, t++) {
@@ -102,17 +129,17 @@ bool calculate_tree(league* lg, team* tm) {
     int left_teams;
     for (left_teams = GROUPS_NUM * 2; left_teams > 1; left_teams /= 2) {
         for (t = 0; t < left_teams / 2; t++) {
-            printf("%d %c %d , ", tree_teams[2 * t]->id, (lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id] || lg->positive_manipulators[tree_teams[2 * t + 1]->id][tree_teams[2 * t]->id])? '>':'<', tree_teams[2 * t + 1]->id);
+            LOGD("%d %c %d , ", tree_teams[2 * t]->id, (lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id] || lg->positive_manipulators[tree_teams[2 * t + 1]->id][tree_teams[2 * t]->id])? '>':'<', tree_teams[2 * t + 1]->id);
             if (lg->strength_graph[tree_teams[2 * t]->id][tree_teams[2 * t + 1]->id] || lg->positive_manipulators[tree_teams[2 * t + 1]->id][tree_teams[2 * t]->id]) {
                 tree_teams[t] = tree_teams[2 * t];
             } else {
                 tree_teams[t] = tree_teams[2 * t + 1];
             }
         }
-        printf("\n");
+        LOGD("\n");
     }
-    printf("%d\n", tree_teams[0]->id);
-    if (tree_teams[0]->id == tm->id) {
+    LOGD("%d\n", tree_teams[0]->id);
+    if (tree_teams[0]->id == lg->manipulated_team_id) {
         return true;
     } else {
         return false;
@@ -123,25 +150,25 @@ bool try_swap_two_firsts_on_tm_group(league* lg) {
     return false;
 }
 
-int algorithm_execute(league* lg, team* tm) {
+int algorithm_execute(league* lg) {
     calculate_groups_scores(lg);
-    if (calculate_tree(lg, tm)) {
-        printf("yes!\n");
+    if (calculate_tree(lg)) {
+        LOGT("yes!\n");
         return 0;
     }
     if (try_swap_two_firsts_on_tm_group(lg)) {
-        if (calculate_tree(lg, tm)) {
-            printf("yes!\n");
+        if (calculate_tree(lg)) {
+            LOGT("yes!\n");
             return 0;
         }
     }
-    printf("no!\n");
+    LOGT("no!\n");
     return 0;
 }
 
 int main(int argc, char** argv) {
     league lg;
-    algorithm_init(&lg);
-    algorithm_execute(&lg, lg.groups[0]->teams[0]);
+    algorithm_init(&lg, argc, argv);
+    algorithm_execute(&lg);
     return 0;
 }
