@@ -125,6 +125,7 @@ int calculate_groups_scores(league* lg) {
     int g, t1, t2;
     team* temp;
     for (g = 0; g < GROUPS_NUM; g++) {
+        LOGD("GROUP %d - calculate winners:\n", g);
         for (t1 = 0; t1 < GROUP_SIZE; t1++) {
             for (t2 = t1 + 1; t2 < GROUP_SIZE; t2++) {
                 if (game_winner_first_win(lg, lg->groups[g]->teams[t1]->id, lg->groups[g]->teams[t2]->id) == true) {
@@ -135,6 +136,7 @@ int calculate_groups_scores(league* lg) {
             }
         }
         LOGD("\n");
+        LOGD("calculate table order:\n");
         for (t1 = 0; t1 < GROUP_SIZE; t1++) {
             for (t2 = t1 + 1; t2 < GROUP_SIZE; t2++) {
                 if (first_team_best_score(lg, lg->groups[g]->teams[t2], lg->groups[g]->teams[t1])) {
@@ -145,11 +147,11 @@ int calculate_groups_scores(league* lg) {
             }
         }
         LOGD("\n");
-        LOGD("GROUP %d:\n", lg->groups[g]->id);
+        LOGD("final table:\n");
         for (t1 = 0; t1 < GROUP_SIZE; t1++) {
             LOGD("TEAM %d: score=%d\n", lg->groups[g]->teams[t1]->id, lg->groups[g]->teams[t1]->score);
         }
-        LOG(LOG_LVL_DEBUG, "\n");
+        LOGD("\n");
     }
     return 0;
 }
