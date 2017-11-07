@@ -1,8 +1,7 @@
 #include <stdio.h>
 
 //TODO: tests should be performed on each options to create group of manipulators.
-//file has only the tests that result should be "yes", other should result "no" for test to pass.
-//for no tests are performed only on cases in the file.
+//TODO: tests should be performed on each options of teams strengths graph.
 
 int main(int argc, char** argv) {
     ssize_t read;
