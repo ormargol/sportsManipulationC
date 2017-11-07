@@ -20,21 +20,24 @@ int main(int argc, char** argv) {
         if (line == NULL) {
             printf("line=NULL\n");
         }
-        printf("line: %s", line);
         if (line[0] != '#') {
-            sprintf(command, "./app T %s", line);
-            printf("run: %s\n", command);
+            sprintf(command, "./app 1 %s", line);
+            printf("run: %s", command);
             pd = popen(command, "r");
             if (fgets(res_str, sizeof(res_str), pd) == NULL) {
                 printf("error\n");
                 return 1;
             }
             pclose(pd);
-            if (!strcmp(res_str, "no!")) {
-                command[6] = 'D';
+            if (!strcmp(res_str, "no")) {
+                printf("failed, run with debug:\n");
+                command[6] = '2';
                 printf("run: %s\n", command);
                 system(command);
-                command[6] = 'T';
+                return 1;
+                command[6] = '1';
+            } else {
+                printf("pass\n");
             }
         }
     }
