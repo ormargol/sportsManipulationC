@@ -5,7 +5,7 @@ int main(int argc, char** argv) {
     char *line = NULL;
     size_t len = 0;
     char command[100];
-    char res_str[2];
+    char res_str[3];
     if (argc <= 1) {
         printf("Error\n");
         return 1;
