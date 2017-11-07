@@ -81,12 +81,14 @@ int algorithm_init(league* lg, int argc, char** argv) {
 int calculate_groups_scores(league* lg) {
     int g, t1, t2;
     team* temp;
+    int manipulations = 0;
     for (g = 0; g < GROUPS_NUM; g++) {
         for (t1 = 0; t1 < GROUP_SIZE; t1++) {
             for (t2 = t1 + 1; t2 < GROUP_SIZE; t2++) {
 
                 if (lg->positive_manipulators[lg->groups[g]->teams[t1]->id][lg->groups[g]->teams[t2]->id]) {
                     lg->groups[g]->teams[t2]->score += 3;
+                    manipulations++;
                     continue;
                 }
                 if (lg->strength_graph[lg->groups[g]->teams[t2]->id][lg->groups[g]->teams[t1]->id]) {
@@ -98,7 +100,9 @@ int calculate_groups_scores(league* lg) {
         }
         for (t1 = 0; t1 < GROUP_SIZE; t1++) {
             for (t2 = t1 + 1; t2 < GROUP_SIZE; t2++) {
-                if (lg->groups[g]->teams[t1]->score < lg->groups[g]->teams[t2]->score) {
+                if (lg->groups[g]->teams[t1]->score < lg->groups[g]->teams[t2]->score ||
+                        (manipulations > 0 && lg->groups[g]->teams[t1]->score == lg->groups[g]->teams[t2]->score &&
+                        (lg->groups[g]->teams[t2]->id == lg->manipulated_team_id || lg->positive_manipulators[lg->groups[g]->teams[t2]->id][lg->manipulated_team_id] == true))) {
                     temp = lg->groups[g]->teams[t1];
                     lg->groups[g]->teams[t1] = lg->groups[g]->teams[t2];
                     lg->groups[g]->teams[t2] = temp;
